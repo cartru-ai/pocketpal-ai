@@ -42,6 +42,7 @@ import {
 import {MessageType} from '../../utils/types';
 import {L10nContext, UserContext} from '../../utils';
 import {t} from '../../locales';
+import {pickAndReadTextFile} from '../../utils/attachFile';
 
 import {
   SendButton,
@@ -385,6 +386,15 @@ export const ChatInput = observer(
       setSelectedImages(newImages);
     };
 
+    // Adjuntar un archivo de texto: su contenido se agrega al mensaje
+    const handleAttachFile = async () => {
+      setShowImageUploadMenu(false);
+      const content = await pickAndReadTextFile();
+      if (content) {
+        handleChangeText(value ? `${value}\n\n${content}` : content);
+      }
+    };
+
     const handleCancel = () => {
       setText('');
       onCancelEdit?.();
@@ -416,8 +426,8 @@ export const ChatInput = observer(
 
     const onSurfaceColor = currentActivePal?.color?.[0] || theme.colors.text;
     const onSurfaceColorVariant = onSurfaceColor + '55'; // for disabled state or placeholder text
-    // // Plus button state
-    const isPlusButtonEnabled = !isStreaming && isVisionEnabled;
+    // // Plus button state (siempre activo para poder adjuntar archivos)
+    const isPlusButtonEnabled = !isStreaming;
     const plusColor = isPlusButtonEnabled
       ? onSurfaceColor
       : onSurfaceColorVariant;
@@ -579,6 +589,11 @@ export const ChatInput = observer(
                       label={l10n.common?.gallery || 'Gallery'}
                       icon="image"
                       onPress={handleSelectImages}
+                    />
+                    <Menu.Item
+                      label="Archivo (CSV, texto)"
+                      icon="file-document"
+                      onPress={handleAttachFile}
                     />
                   </Menu>
                 )}
